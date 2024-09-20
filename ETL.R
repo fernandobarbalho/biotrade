@@ -59,6 +59,13 @@ saveRDS(unctad, "unctad.RDS")
 
 
 
+brazil_full<-
+  unctad %>%
+  filter(economy_label == "Brazil")
+
+brazil_full <- as_tibble(brazil_full)
+
+brazil_full %>% saveRDS("brazil_full.rds")
 
 
 
