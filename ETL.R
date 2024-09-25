@@ -111,8 +111,21 @@ brazil_full %>%
 
 eu_countries_2021 <- read_csv("eu_countries_2021.csv")
 
+eu_countries_2021 <-
 eu_countries_2021 %>%
-  bind_rows(tibble(partner = 538,  partner_label = "Netherlands (Kingdom of the)" ))
+  bind_rows(tibble(partner = 528,  partner_label = "Netherlands (Kingdom of the)" ))
 
 saveRDS(eu_countries_2021, "eu_countries_2021.rds")
 
+
+paises_sel<- c(1:1399,3412)
+
+mundo_bio_trade<-
+  unctad %>%
+  filter(str_length(product)==3,
+         partner %in% paises_sel,
+         economy %in% paises_sel)
+
+mundo_bio_trade <- as_tibble(mundo_bio_trade)
+
+saveRDS(mundo_bio_trade, "mundo_bio_trade")  

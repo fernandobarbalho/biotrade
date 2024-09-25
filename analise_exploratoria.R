@@ -170,3 +170,41 @@ brazil_full %>%
   summarise(total = sum(us_dollars_at_current_prices_in_thousands),
             .by = c(product_label, product)) %>%
   slice_max(order_by = total, n= 10)
+
+
+ingredientes_naturais_china<-
+  brazil_full %>%
+  filter(str_starts(product,"B_D"),
+         str_length(product)==6,
+         flow == 2,
+         partner_label== "China") %>%
+  summarise( sum(us_dollars_at_current_prices_in_thousands),
+             .by = c(product, product_label))
+
+mundo_bio_trade %>%
+  filter(flow == 2) %>%
+  summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE)/10^6,
+            .by = c(economy, economy_label)) %>%
+  slice_max(order_by = total, n=10)
+
+
+mundo_bio_trade %>%
+  filter(flow == 2) %>%
+  summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE)/10^6,
+            .by = c(product, product_label)) %>%
+  slice_max(order_by = total, n=10)
+
+
+mundo_bio_trade %>%
+  filter(flow == 1) %>%
+  summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE)/10^6,
+            .by = c(economy, economy_label)) %>%
+  slice_max(order_by = total, n=10)
+
+mundo_bio_trade %>%
+  filter(flow == 2,
+         economy != 3412,
+         partner != 3412) %>%
+  summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE)/10^6,
+            .by = c(economy, economy_label, product, product_label, partner, partner_label)) %>%
+  slice_max(order_by = total, n=10)
