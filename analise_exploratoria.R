@@ -1,10 +1,17 @@
+library(tidyverse)
+
 load("unctad.RDS")
 
 brazil_full <- readRDS("~/github/biotrade/brazil_full.rds")
 
 
+parceiros<-
+  brazil_full %>%
+  distinct(partner, partner_label)
 
 
+
+#### Ranking dez maiores saldos
 brazil_full %>%
   filter(partner < 1400,
          partner >0,
@@ -14,6 +21,90 @@ brazil_full %>%
             .by =c(partner_label, partner)) %>%
   slice_max(order_by = total, n= 10)
 
+
+
+#### Análises a partir do Ranking dos maiores produtos exportados
+
+total_produtos_exportados<-
+  (brazil_full %>%
+  filter(partner < 1400,
+         partner >0,
+         product == "B_TOT", 
+         flow == 2) %>%
+  summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE)))$total 
+
+    
+
+brazil_full %>%
+  filter(partner < 1400,
+         partner >0,
+         flow == 2,
+         str_length(product)==3) %>%
+  summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE),
+            .by =c(product_label)) %>%
+  mutate(product_label = reorder(product_label, total)) %>%
+  ggplot(aes(x= total, y= product_label)) +
+  geom_col()
+
+
+brazil_full %>%
+  filter(partner < 1400,
+         partner >0,
+         flow == 2,
+         str_length(product)==3) %>%
+  summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE),
+            percentual = (total/total_produtos_exportados)*100,
+            .by =c(product_label)) %>%
+  mutate(product_label = reorder(product_label, percentual)) %>%
+  ggplot(aes(x= percentual, y= product_label)) +
+  geom_col()
+
+  
+product<-
+brazil_full %>%
+  filter(str_length(product)==3) %>%
+  distinct(product, product_label) 
+  
+
+brazil_full %>%
+  filter(partner < 1400,
+         partner >0,
+         flow == 2,
+         str_length(product)==4,
+         str_starts(product, "B_B")) %>%
+  summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE),
+            .by =c(product_label)) %>%
+  mutate(product_label = reorder(product_label, total)) %>%
+  ggplot(aes(x= total, y= product_label)) +
+  geom_col()
+
+
+product_nivel_4<-
+  brazil_full %>%
+  filter(str_starts(product,"B_B")) %>%
+  distinct(product, product_label) 
+
+
+brazil_full %>%
+  filter(partner < 1400,
+         partner >0,
+         flow == 2,
+         product == "B_BA") %>%
+  summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE),
+            .by =c(partner_label)) %>%
+  slice_max(order_by = total, n=10 ) %>%
+  mutate(partner_label = reorder(partner_label, total)) %>%
+  ggplot(aes(x= total, y= partner_label)) +
+  geom_col()
+
+
+#### Análises a partir do Ranking dos maiores importadores
+
+
+
+
+
+##### Fazer análises com G20
 
 ###Exercícios Artentina
 

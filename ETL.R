@@ -103,4 +103,16 @@ ied_1990_2023 <- read_csv("US_FdiFlowsStock.csv/US_FdiFlowsStock.csv")
 
 ied_1990_2023 <- janitor::clean_names(ied_1990_2023)
 
+brazil_full %>%
+  filter(partner>0 ,
+         partner<1400) %>%
+  distinct(partner, partner_label) %>%
+  readr::write_csv("paises_base_dados.csv")
+
+eu_countries_2021 <- read_csv("eu_countries_2021.csv")
+
+eu_countries_2021 %>%
+  bind_rows(tibble(partner = 538,  partner_label = "Netherlands (Kingdom of the)" ))
+
+saveRDS(eu_countries_2021, "eu_countries_2021.rds")
 
