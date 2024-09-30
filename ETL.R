@@ -128,4 +128,4 @@ mundo_bio_trade<-
 
 mundo_bio_trade <- as_tibble(mundo_bio_trade)
 
-saveRDS(mundo_bio_trade, "mundo_bio_trade")  
+saveRDS(mundo_bio_trade, "mundo_bio_trade.rds")  

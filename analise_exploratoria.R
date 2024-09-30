@@ -182,7 +182,8 @@ ingredientes_naturais_china<-
              .by = c(product, product_label))
 
 mundo_bio_trade %>%
-  filter(flow == 2) %>%
+  filter(flow == 2,
+         economy!= 3412) %>%
   summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE)/10^6,
             .by = c(economy, economy_label)) %>%
   slice_max(order_by = total, n=10)
@@ -196,7 +197,8 @@ mundo_bio_trade %>%
 
 
 mundo_bio_trade %>%
-  filter(flow == 1) %>%
+  filter(flow == 1,
+         economy!= 3412) %>%
   summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE)/10^6,
             .by = c(economy, economy_label)) %>%
   slice_max(order_by = total, n=10)
@@ -206,5 +208,5 @@ mundo_bio_trade %>%
          economy != 3412,
          partner != 3412) %>%
   summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE)/10^6,
-            .by = c(economy, economy_label, product, product_label, partner, partner_label)) %>%
+            .by = c(economy_label, product_label, partner_label)) %>%
   slice_max(order_by = total, n=10)
