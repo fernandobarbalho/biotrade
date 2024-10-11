@@ -50,16 +50,28 @@ pca_result <- prcomp(data_scaled, center = TRUE, scale. = TRUE)
 
 # Resumir os resultados
 summary(pca_result)
+plot(pca_result)
 
 # Visualizar variância explicada por cada componente
 fviz_eig(pca_result)
 
 # Visualizar os países no espaço dos componentes principais
 fviz_pca_ind(pca_result, 
-             geom.ind = "point",
+             geom.ind = c("point"),
              col.ind = "blue", 
              addEllipses = TRUE,
              ellipse.level = 0.95)
+
+
+fviz_pca_ind(pca_result, 
+             geom.ind = "point",
+             col.ind = "blue", 
+             addEllipses = TRUE,
+             ellipse.level = 0.75)
+
+
+paises_coordendas<-
+  paises$data
 
 # Visualizar a contribuição de cada produto para os componentes principais
 fviz_pca_var(pca_result, 
@@ -73,3 +85,36 @@ fviz_pca_biplot(pca_result,
                 col.ind = "blue", 
                 col.var = "red",
                 repel = TRUE)
+
+dados_dimensoes<- pca_result[["x"]]
+dados_duas_dimensoes <- dados_dimensoes[,1:2]
+
+dados_modelo<-as.tibble(dados_duas_dimensoes)  
+dados_modelo$contribuicao<- paises_coordendas$contrib
+
+dados_modelo %>%
+  mutate(tipo = ifelse(PC2<0, "EUA", "China"))
+
+library(caret)
+
+control_dt <- trainControl(method="cv")
+seed <- 1972
+set.seed(seed)
+
+
+
+dt_model <- train(  ~ x +  y ,
+                  data= paises_coordendas, 
+                  method="rpart", 
+                  trControl=control_dt)
+
+dt_model
+
+boxplot(paises_coordendas$x)
+
+boxplot(paises_coordendas$y)
+
+summary(dados_modelo)
+
+
+boxplot(paises_coordendas$contrib)
