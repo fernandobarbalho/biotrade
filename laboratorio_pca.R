@@ -118,3 +118,13 @@ summary(dados_modelo)
 
 
 boxplot(paises_coordendas$contrib)
+
+dados_modelo_eua_china<-
+dados_modelo %>%
+  filter(contribuicao >= quantile(paises_coordendas$contrib)[4]+1.5*IQR(paises_coordendas$contrib))
+
+quantile(paises_coordendas$contrib)[4]+1.5*IQR(paises_coordendas$contrib)
+
+
+paises_coordendas %>%
+  filter(x>0)
