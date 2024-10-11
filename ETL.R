@@ -54,6 +54,8 @@ unctad<-
 
 unctad<- janitor::clean_names(unctad)
 
+unctad<- as_tibble(unctad)
+
 saveRDS(unctad, "unctad.RDS")
 
 
@@ -129,3 +131,39 @@ mundo_bio_trade<-
 mundo_bio_trade <- as_tibble(mundo_bio_trade)
 
 saveRDS(mundo_bio_trade, "mundo_bio_trade.rds")  
+
+economias_distintas<-
+ unctad %>%
+  distinct(economy, economy_label)
+
+
+
+eua_can_mex<-
+unctad %>%
+  filter(product == "B_TOT",
+         economy %in% c(842,124, 484 ),
+         flow==2) %>%
+  select(economy_label, partner_label, us_dollars_at_current_prices_in_thousands)
+
+sum(eua_can_mex$us_dollars_at_current_prices_in_thousands, na.rm = TRUE)
+
+
+north_america<-
+unctad %>%
+  filter(product == "B_TOT",
+         economy %in% c(5210 ),
+         flow==2) %>%
+  select(economy_label, partner_label,us_dollars_at_current_prices_in_thousands)
+
+
+sum(north_america$us_dollars_at_current_prices_in_thousands, na.rm = TRUE)
+
+continentes_economia<- c(5702, 5220, 5600, 5100)
+
+continente_bio_trade<-
+  unctad %>%
+  filter(str_length(product)==3,
+         partner %in% continentes_economia,
+         economy %in% continentes_economia)
+
+saveRDS(continente_bio_trade, "continente_bio_trade.rds")
