@@ -5,7 +5,7 @@ date: "2024-10-16"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 # Carregar bibliotecas necessárias
 library(tidyverse)
@@ -20,7 +20,7 @@ library(sf)
 data("world")
 
 brazil_full <- readRDS("~/github/biotrade/brazil_full.rds")
-top_3_produtos<- c("Food and beverage", "Wood and derived products", "Natural ingredients")
+top_3_produtos<- c("Natural ingredients", "Wood and derived products", "Food and beverage"  )
 
 # Lista de países fornecida
 paises <- c("Algeria", "Argentina", "Australia", "Bangladesh", "Belgium", 
@@ -135,9 +135,36 @@ dados_analise<-
 
 
 ```{r fig.height=8, fig.width=11, fig.dpi= 300}
+
+graf1<-
 dados_analise %>%
+  filter(tipo_pais == "China") %>%
   mutate(product_label = ifelse(product_label %in% top_3_produtos,product_label, "Other products" ) ) %>%
-  mutate(product_label = fct_reorder(product_label,total_pais,sum, .desc = TRUE)) %>%
+  mutate(product_label = factor(str_wrap(product_label,10), levels = str_wrap(c(top_3_produtos,"Other products"),10))) %>%
+  mutate(partner_label = fct_reorder(partner_label,total_pais,sum)) %>%
+  ggplot(aes(y=partner_label, x=perc_pais)) +
+  geom_col(aes(fill = product_label), show.legend = FALSE)  +
+  scale_fill_discrete_qualitative(palette = "Dark 2") +
+  theme_light()+
+  theme(
+    panel.grid = element_blank(),
+    panel.background = element_rect(fill = "black"),
+    strip.background = element_rect(fill =  "black")
+  ) +
+  #facet_wrap(tipo_pais ~.) +
+  labs(
+    x= "",
+    y="",
+    fill = "produto",
+    title = "Países tipo China",
+    subtitle = "Destaque: Ingredientes e Alimentos"
+  )
+
+graf2<-
+dados_analise %>%
+  filter(tipo_pais == "EUA") %>%
+  mutate(product_label = ifelse(product_label %in% top_3_produtos,product_label, "Other products" ) ) %>%
+  mutate(product_label = factor(str_wrap(product_label,10), levels = str_wrap(c(top_3_produtos,"Other products"),10))) %>%
   mutate(partner_label = fct_reorder(partner_label,total_pais,sum)) %>%
   ggplot(aes(y=partner_label, x=perc_pais)) +
   geom_col(aes(fill = product_label))  +
@@ -146,15 +173,22 @@ dados_analise %>%
   theme(
     panel.grid = element_blank(),
     panel.background = element_rect(fill = "black"),
-    strip.background = element_rect(fill =  "black")
+    strip.background = element_rect(fill =  "black"),
+    legend.position =  "bottom",
+    legend.title  = element_blank()
+    
   ) +
-  facet_wrap(tipo_pais ~.) +
+  #facet_wrap(tipo_pais ~.) +
   labs(
     x= "",
     y="",
-    fill = "produto"
+    fill = "produto",
+    title = "Países tipo EUA",
+    subtitle = "Destaque: Madeira"
   )
 
+  graf1 + graf2
+  
 
 ```
 
@@ -301,7 +335,7 @@ dados_analise %>%
 graf1 + graf2
 ```
 
-```{r}
+```{r fig.height=8, fig.width=11, fig.dpi= 300}
 
 paises_mapa<-
   dados_analise %>%
@@ -315,7 +349,9 @@ brasil<-
   world %>%
   filter(iso_a2 == "BR")
 
-world %>%left_join(paises_mapa) %>%
+world %>%
+  left_join(paises_mapa) %>%
+  mutate(tipo_pais = ifelse(is.na(tipo_pais),"Não associado",tipo_pais)) %>%
   ggplot() +
   geom_sf(aes(fill=tipo_pais)) +
   geom_sf(data = brasil, fill= "yellow") +
