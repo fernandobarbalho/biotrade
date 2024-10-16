@@ -424,3 +424,5 @@ dados_analise %>%
   ggplot(aes(x=pc1, y=pc2)) +
   geom_point(aes(color=tipo_pais)) +
   geom_point(data = dados_sel, color ="blue")
+
+

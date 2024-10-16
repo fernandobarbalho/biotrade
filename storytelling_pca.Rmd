@@ -12,12 +12,49 @@ library(tidyverse)
 library(factoextra)
 library(colorspace)
 library(patchwork)
+library(spData)
+library(sf)
 
+###Dados
+
+data("world")
 
 brazil_full <- readRDS("~/github/biotrade/brazil_full.rds")
 top_3_produtos<- c("Food and beverage", "Wood and derived products", "Natural ingredients")
 
-#preparação estatística
+# Lista de países fornecida
+paises <- c("Algeria", "Argentina", "Australia", "Bangladesh", "Belgium", 
+            "Bolivia (Plurinational State of)", "Canada", "Chile", "China", 
+            "China, Hong Kong SAR", "China, Taiwan Province of", "Colombia", 
+            "Dominican Republic", "Ecuador", "Egypt", "France", "Georgia", 
+            "Germany", "India", "Indonesia", "Iran (Islamic Republic of)", 
+            "Israel", "Italy", "Japan", "Jordan", "Korea, Republic of", 
+            "Malaysia", "Mexico", "Morocco", "Netherlands (Kingdom of the)", 
+            "Nigeria", "Pakistan", "Paraguay", "Peru", "Philippines", 
+            "Portugal", "Russian Federation", "Saudi Arabia", "Singapore", 
+            "South Africa", "Spain", "Thailand", "Türkiye", 
+            "United Arab Emirates", "United Kingdom", "United States of America", 
+            "Uruguay", "Venezuela (Bolivarian Rep. of)", "Viet Nam")
+
+# Códigos ISO correspondentes
+iso_codes <- c("DZ", "AR", "AU", "BD", "BE", 
+               "BO", "CA", "CL", "CN", 
+               "HK", "TW", "CO", 
+               "DO", "EC", "EG", "FR", "GE", 
+               "DE", "IN", "ID", "IR", 
+               "IL", "IT", "JP", "JO", "KR", 
+               "MY", "MX", "MA", "NL", 
+               "NG", "PK", "PY", "PE", "PH", 
+               "PT", "RU", "SA", "SG", 
+               "ZA", "ES", "TH", "TR", 
+               "AE", "GB", "US", 
+               "UY", "VE", "VN")
+
+# Criando o dataframe
+df_paises_iso <- tibble(pais = paises, iso_a2 = iso_codes)
+
+
+############preparação estatística
 dados_pca<-
   brazil_full %>%
   filter(product_label %in% top_3_produtos,
@@ -262,5 +299,33 @@ dados_analise %>%
   ) 
 
 graf1 + graf2
+```
+
+```{r}
+
+paises_mapa<-
+  dados_analise %>%
+  mutate(pais = partner_label) %>%
+  inner_join(
+    df_paises_iso
+  )
+
+
+brasil<-
+  world %>%
+  filter(iso_a2 == "BR")
+
+world %>%left_join(paises_mapa) %>%
+  ggplot() +
+  geom_sf(aes(fill=tipo_pais)) +
+  geom_sf(data = brasil, fill= "yellow") +
+  scale_fill_discrete_qualitative(palette = "Dark 2", na.value="gray") +
+  theme_void() +
+  theme(
+    panel.background = element_rect(fill="#0077be")
+  ) +
+  labs(
+    fill= str_wrap("Tipo de país")
+  )
 ```
 
