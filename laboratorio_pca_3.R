@@ -1,10 +1,5 @@
 brazil_full <- readRDS("~/github/biotrade/brazil_full.rds")
-
 top_3_produtos<- c("Food and beverage", "Wood and derived products", "Natural ingredients")
-
-fab<-
-  brazil_full %>%
-  distinct(partner, partner_label)
 
 brazil_full %>%
   filter(str_length(product) == 3,
@@ -17,7 +12,9 @@ brazil_full %>%
 
 dados_pca<-
   brazil_full %>%
-  filter(between(partner,1,1399)) %>%
+  filter(str_length(product) == 3,
+         between(partner,1,1399)) %>%
+  mutate(product_label = ifelse(product_label %in% top_3_produtos, product_label, "Outros produtos" )) %>%
   summarise(total = sum(us_dollars_at_current_prices_in_thousands),
             .by = c(partner_label, product_label)) %>%
   pivot_wider(names_from = product_label, values_from = total)
@@ -51,12 +48,11 @@ pca_result <- prcomp(data_scaled, center = TRUE, scale. = TRUE)
 summary(pca_result)
 plot(pca_result)
 
-
 # Importance of components:
-#   PC1    PC2     PC3
-# Standard deviation     1.6102 0.5701 0.28689
-# Proportion of Variance 0.8642 0.1083 0.02744
-# Cumulative Proportion  0.8642 0.9726 1.00000
+#   PC1    PC2     PC3     PC4
+# Standard deviation     1.7589 0.7399 0.53241 0.27447
+# Proportion of Variance 0.7734 0.1369 0.07087 0.01883
+# Cumulative Proportion  0.7734 0.9103 0.98117 1.00000
 
 # Visualizar variância explicada por cada componente
 fviz_eig(pca_result)
@@ -93,6 +89,10 @@ fviz_pca_var(pca_result,
              gradient.cols = c("blue", "yellow", "red"),
              repel = TRUE)
 
+produtos_coordenadas<- produtos$data
+
+produtos_coordenadas$my_cos2<- (produtos_coordenadas$x/sqrt(produtos_coordenadas$x^2+produtos_coordenadas$y^2))^2 
+
 
 # Visualizar biplot (países e produtos juntos)
 fviz_pca_biplot(pca_result, 
@@ -114,7 +114,7 @@ dados_modelo <- janitor::clean_names(dados_modelo)
 dados_modelo_eua_china<-
 dados_modelo %>%
   filter(contribuicao >= quantile(paises_coordendas$contrib)[4]+1.5*IQR(paises_coordendas$contrib)) %>%
-  mutate(tipo_pais = ifelse(pc2<0, "EUA","China"))
+  mutate(tipo_pais = ifelse(pc2>0, "EUA","China"))
 
 
 total_produtos<-
@@ -160,17 +160,18 @@ dados_analise %>%
 
 
 dados_analise %>%
-  filter(!partner_label %in% c("United States of America", "China")) %>%
+  #filter(!partner_label %in% c("United States of America", "China")) %>%
   filter(product_label == "Natural ingredients") %>%
   mutate(partner_label = reorder(partner_label,perc_pais)) %>%
   ggplot(aes(y=partner_label, x=perc_pais)) +
   geom_col(aes(fill = tipo_pais)) 
 
+
 dados_analise %>%
   filter(!partner_label %in% c("United States of America", "China")) %>%
-  filter(product_label == "Pharmaceuticals") %>%
-  mutate(partner_label = reorder(partner_label,perc_pais)) %>%
-  ggplot(aes(y=partner_label, x=perc_pais)) +
+  filter(product_label == "Natural ingredients") %>%
+  mutate(partner_label = reorder(partner_label,total_pais)) %>%
+  ggplot(aes(y=partner_label, x=total_pais)) +
   geom_col(aes(fill = tipo_pais)) 
 
 
@@ -182,31 +183,52 @@ dados_analise %>%
   geom_col(aes(fill = tipo_pais)) 
 
 dados_analise %>%
-  filter(!partner_label %in% c("United States of America", "China")) %>%
+  #filter(!partner_label %in% c("United States of America", "China")) %>%
   filter(product_label == "Food and beverage") %>%
   mutate(partner_label = reorder(partner_label,perc_pais)) %>%
   ggplot(aes(y=partner_label, x=perc_pais)) +
   geom_col(aes(fill = tipo_pais)) 
 
 
+dados_analise %>%
+  #filter(!partner_label %in% c("United States of America", "China")) %>%
+  filter(product_label == "Food and beverage") %>%
+  mutate(partner_label = reorder(partner_label,total_pais)) %>%
+  ggplot(aes(y=partner_label, x=total_pais)) +
+  geom_col(aes(fill = tipo_pais)) 
+
+
+
 
 dados_analise %>%
-  filter(!partner_label %in% c("United States of America", "China")) %>%
-  ggplot(aes(x=tipo_pais, y=perc_pais)) +
-  geom_violin() +
-  facet_wrap(product_label~., scales = "free_y")
-
-dados_analise %>%
-  filter(!partner_label %in% c("United States of America", "China")) %>%
-  ggplot(aes(x=tipo_pais, y=perc_pais)) +
-  geom_jitter(aes(color= tipo_pais)) +
-  facet_wrap(product_label~., scales = "free_y")
-
-dados_analise %>%
-  filter(!partner_label %in% c("United States of America", "China")) %>%
-  mutate(partner_label = reorder(partner_label,perc_pais)) %>%
+  #filter(!partner_label %in% c("United States of America", "China")) %>%
+  mutate(product_label = ifelse(product_label %in% top_3_produtos,product_label, "Outros produtos" ) ) %>%
+  mutate(partner_label = fct_reorder(partner_label,total_pais,sum)) %>%
   ggplot(aes(y=partner_label, x=perc_pais)) +
   geom_col(aes(fill = product_label))  +
   facet_wrap(tipo_pais ~.)
 
+dados_analise %>%
+  #filter(!partner_label %in% c("United States of America", "China")) %>%
+  mutate(product_label = ifelse(product_label %in% top_3_produtos,product_label, "Outros produtos" ) ) %>%
+  mutate(partner_label = fct_reorder(partner_label,contribuicao,sum)) %>%
+  ggplot(aes(y=partner_label, x=perc_pais)) +
+  geom_col(aes(fill = product_label))  +
+  facet_wrap(tipo_pais ~.)
+
+
+dados_analise %>%
+  filter(partner_label %in% c("United States of America", "China")) %>%
+  ggplot(aes(x=tipo_pais, y=perc_pais, color = tipo_pais)) +
+  geom_jitter() +
+  facet_wrap(product_label~.)
+
+dados_sel<- 
+  dados_analise %>%
+  filter(partner_label== "India")
+
+dados_analise %>%
+  ggplot(aes(x=pc1, y=pc2)) +
+  geom_point(aes(color=tipo_pais)) +
+  geom_point(data = dados_sel, color ="blue")
 
