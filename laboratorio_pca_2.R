@@ -250,3 +250,177 @@ dados_analise %>%
   geom_point(aes(color=tipo_pais)) +
   geom_point(data = dados_sel, color ="blue")
 
+
+
+###Análise com países relevantes
+
+data_scaled <- as_tibble(data_scaled)
+
+data_scaled$partner_label <- dados_pca$partner_label
+
+padronizado_relevante<-
+data_scaled %>%
+  mutate(name = as.character(row_number())) %>%
+  filter(food_and_beverage>=0 |
+         wood_and_derived_products>=0 |
+         natural_ingredients>=0)  %>%
+  inner_join(paises_coordendas)
+
+
+dados_modelo_eua_china_relevante<-
+  #dados_modelo %>%
+  #filter(contribuicao >= quantile(paises_coordendas$contrib)[4]+1.5*IQR(paises_coordendas$contrib)) %>%
+  #filter(contribuicao >= quantile(paises_coordendas$contrib)[3]) %>%
+  #filter(contribuicao >= min(padronizado_relevante$contrib)) %>%
+  padronizado_relevante %>%
+  mutate(tipo_pais = ifelse(y>0, "EUA","China"))
+
+
+total_produtos<-
+  brazil_full %>%
+  filter(str_length(product) == 3,
+         between(partner,1,1399)) %>%
+  summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm= TRUE),
+            .by = c( product_label))
+
+total_pais<-
+  brazil_full %>%
+  filter(str_length(product) == 3,
+         between(partner,1,1399)) %>%
+  summarise(total = sum(us_dollars_at_current_prices_in_thousands, na.rm= TRUE),
+            .by = c( partner_label))
+
+
+total_produtos_pais<-
+  brazil_full %>%
+  filter(str_length(product) == 3,
+         between(partner,1,1399)) %>%
+  summarise(total_pais = sum(us_dollars_at_current_prices_in_thousands, na.rm = TRUE),
+            .by = c(partner_label, product_label)) %>%
+  inner_join(total_pais) %>%
+  mutate(perc_pais = (total_pais/total)*100)
+
+
+dados_analise<-
+  dados_modelo_eua_china_relevante %>%
+  inner_join(total_produtos_pais)
+
+dados_analise %>%
+  filter(!partner_label %in% c("United States of America", "China")) %>%
+  ggplot(aes(x=tipo_pais, y=perc_pais)) +
+  geom_boxplot() +
+  facet_wrap(product_label~., scales = "free_y")
+
+dados_analise %>%
+  filter(!partner_label %in% c("United States of America", "China")) %>%
+  ggplot(aes(x=tipo_pais, y=total_pais)) +
+  geom_boxplot() +
+  facet_wrap(product_label~., scales = "free_y")
+
+
+dados_analise %>%
+  #filter(!partner_label %in% c("United States of America", "China")) %>%
+  filter(product_label == "Natural ingredients") %>%
+  
+  mutate(partner_label = reorder(partner_label,perc_pais)) %>%
+  ggplot(aes(y=partner_label, x=perc_pais)) +
+  geom_col(aes(fill = tipo_pais)) 
+
+
+
+
+dados_analise %>%
+  filter(!partner_label %in% c("United States of America", "China")) %>%
+  filter(product_label == "Natural ingredients") %>%
+  mutate(partner_label = reorder(partner_label,total_pais)) %>%
+  ggplot(aes(y=partner_label, x=total_pais)) +
+  geom_col(aes(fill = tipo_pais)) 
+
+
+dados_analise %>%
+  filter(!partner_label %in% c("United States of America", "China")) %>%
+  filter(product_label == "Wood and derived products") %>%
+  mutate(partner_label = reorder(partner_label,perc_pais)) %>%
+  ggplot(aes(y=partner_label, x=perc_pais)) +
+  geom_col(aes(fill = tipo_pais)) 
+
+dados_analise %>%
+  #filter(!partner_label %in% c("United States of America", "China")) %>%
+  filter(product_label == "Food and beverage") %>%
+  mutate(partner_label = reorder(partner_label,perc_pais)) %>%
+  ggplot(aes(y=partner_label, x=perc_pais)) +
+  geom_col(aes(fill = tipo_pais)) 
+
+
+dados_analise %>%
+  #filter(!partner_label %in% c("United States of America", "China")) %>%
+  filter(product_label == "Food and beverage") %>%
+  mutate(partner_label = reorder(partner_label,total_pais)) %>%
+  ggplot(aes(y=partner_label, x=total_pais)) +
+  geom_col(aes(fill = tipo_pais)) 
+
+
+dados_analise %>%
+  mutate(product_label = ifelse(product_label %in% top_3_produtos,product_label, "Outros produtos" ) ) %>%
+  filter(!partner_label %in% c("United States of America", "China")) %>%
+  filter(product_label == "Outros produtos") %>%
+  mutate(partner_label = reorder(partner_label,perc_pais)) %>%
+  ggplot(aes(y=partner_label, x=perc_pais)) +
+  geom_col(aes(fill = tipo_pais)) 
+
+dados_analise %>%
+  mutate(product_label = ifelse(product_label %in% top_3_produtos,product_label, "Outros produtos" ) ) %>%
+  filter(product_label == "Outros produtos") %>%
+  mutate(partner_label = reorder(partner_label,perc_pais)) %>%
+  ggplot(aes(y=partner_label, x=perc_pais)) +
+  geom_col(aes(fill = tipo_pais)) 
+
+
+
+dados_analise %>%
+  filter(!partner_label %in% c("United States of America", "China")) %>%
+  ggplot(aes(x=tipo_pais, y=perc_pais)) +
+  geom_violin() +
+  facet_wrap(product_label~., scales = "free_y")
+
+dados_analise %>%
+  filter(!partner_label %in% c("United States of America", "China")) %>%
+  ggplot(aes(x=tipo_pais, y=perc_pais)) +
+  geom_jitter(aes(color= tipo_pais)) +
+  facet_wrap(product_label~., scales = "free_y")
+
+top_3_produtos<- c("Food and beverage", "Wood and derived products", "Natural ingredients")
+
+dados_analise %>%
+  #filter(!partner_label %in% c("United States of America", "China")) %>%
+  mutate(product_label = ifelse(product_label %in% top_3_produtos,product_label, "Outros produtos" ) ) %>%
+  mutate(partner_label = fct_reorder(partner_label,total_pais,sum)) %>%
+  ggplot(aes(y=partner_label, x=perc_pais)) +
+  geom_col(aes(fill = product_label))  +
+  facet_wrap(tipo_pais ~.)
+
+dados_analise %>%
+  #filter(!partner_label %in% c("United States of America", "China")) %>%
+  mutate(product_label = ifelse(product_label %in% top_3_produtos,product_label, "Outros produtos" ) ) %>%
+  #mutate(partner_label = fct_reorder(partner_label,total_pais,sum)) %>%
+  mutate(partner_label = reorder(partner_label,contribuicao)) %>%
+  ggplot(aes(y=partner_label, x=perc_pais)) +
+  geom_col(aes(fill = product_label))  +
+  facet_wrap(tipo_pais ~.)
+
+
+
+dados_analise %>%
+  filter(partner_label %in% c("United States of America", "China")) %>%
+  ggplot(aes(x=tipo_pais, y=perc_pais, color = tipo_pais)) +
+  geom_jitter() +
+  facet_wrap(product_label~.)
+
+dados_sel<- 
+  dados_analise %>%
+  filter(partner_label== "India")
+
+dados_analise %>%
+  ggplot(aes(x=pc1, y=pc2)) +
+  geom_point(aes(color=tipo_pais)) +
+  geom_point(data = dados_sel, color ="blue")
