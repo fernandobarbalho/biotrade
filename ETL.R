@@ -158,7 +158,7 @@ unctad %>%
 
 sum(north_america$us_dollars_at_current_prices_in_thousands, na.rm = TRUE)
 
-continentes_economia<- c(5702, 5220, 5600, 5100)
+continentes_economia<- c( 5400, 5220, 5600, 5100,5210) #5702
 
 continente_bio_trade<-
   unctad %>%
@@ -167,3 +167,10 @@ continente_bio_trade<-
          economy %in% continentes_economia)
 
 saveRDS(continente_bio_trade, "continente_bio_trade.rds")
+
+
+fab<-
+  unctad %>%
+  filter(str_length(product)==3,
+         #partner %in% continentes_economia,
+         economy %in% continentes_economia)
