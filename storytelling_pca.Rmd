@@ -105,7 +105,7 @@ padronizado_relevante<- janitor::clean_names(padronizado_relevante)
 
 dados_modelo_eua_china_relevante<-
   padronizado_relevante %>%
-  mutate(tipo_pais = ifelse(pc2>0, "EUA","China"))
+  mutate(tipo_pais = ifelse(pc2>0, "Florestal Ocidental","Natural Oriental"))
 
 
 
@@ -164,7 +164,7 @@ total_comercio<-
 
 graf1<-
 dados_analise %>%
-  filter(tipo_pais == "China") %>%
+  filter(tipo_pais == "Natural Oriental") %>%
   mutate(product_label = factor(str_wrap(product_label,10), levels = str_wrap(c(top_3_produtos,"Other products"),10))) %>%
   mutate(partner_label = fct_reorder(partner_label,total_pais,sum)) %>%
   ggplot(aes(y=partner_label, x=perc_pais)) +
@@ -180,13 +180,13 @@ dados_analise %>%
     x= "",
     y="",
     fill = "produto",
-    title = "Países tipo China",
+    title = "Bloco Natural Oriental",
     subtitle = "Diferenciadores: Ingredientes e Alimentos"
   )
 
 graf2<-
 dados_analise %>%
-  filter(tipo_pais == "EUA") %>%
+  filter(tipo_pais == "Florestal Ocidental") %>%
   mutate(product_label = factor(str_wrap(product_label,10), levels = str_wrap(c(top_3_produtos,"Other products"),10))) %>%
   mutate(partner_label = fct_reorder(partner_label,total_pais,sum)) %>%
   ggplot(aes(y=partner_label, x=perc_pais)) +
@@ -205,7 +205,7 @@ dados_analise %>%
     x= "",
     y="",
     fill = "produto",
-    title = "Países tipo EUA",
+    title = "Bloco Florestal Ocidental",
     subtitle = "Diferenciador: Madeira"
   )
 
@@ -233,7 +233,7 @@ dados_analise_tipo_pais %>%
     x= "(%)",
     y="",
     fill = "produto",
-    title = "Proporção de produto por tipo de país"
+    title = "Proporção de produto por bloco"
   )
 
 
@@ -258,7 +258,7 @@ dados_analise_tipo_pais %>%
     x= "Valores em US$ bi",
     y="",
     fill = "produto",
-    title = "Volume de comércio por tipo de país"
+    title = "Volume de comércio por bloco"
   )
 
   graf1 + graf2
@@ -277,7 +277,7 @@ dados_analise %>%
   mutate(partner_label = reorder(partner_label,perc_pais)) %>%
   ggplot(aes(y=partner_label, x=perc_pais)) +
   geom_col(aes(fill = tipo_pais), show.legend = FALSE)+
-  scale_fill_discrete_qualitative(palette = "Dark 3") +
+  scale_fill_discrete_qualitative(palette = "Dark 3", rev=TRUE) +
   theme_light()+
   theme(
     panel.grid = element_blank(),
@@ -285,11 +285,11 @@ dados_analise %>%
     strip.background = element_rect(fill =  "black")
   ) +
   labs(
-    title = "Participação",
+    title = str_wrap("Participação nas importações",16),
     subtitle = "Ingredientes naturais",
     x= "(%)",
     y="",
-    fill = "Tipo país"
+    fill = "Bloco"
   )
 
 graf2<-
@@ -300,7 +300,7 @@ dados_analise %>%
   mutate(total_pais = total_pais/10^6) %>%
   ggplot(aes(y=partner_label, x=total_pais)) +
   geom_col(aes(fill = tipo_pais), show.legend = FALSE)+
-  scale_fill_discrete_qualitative(palette = "Dark 3") +
+  scale_fill_discrete_qualitative(palette = "Dark 3", rev=TRUE) +
   theme_light()+
   theme(
     panel.grid = element_blank(),
@@ -308,11 +308,11 @@ dados_analise %>%
     strip.background = element_rect(fill =  "black")
   ) +
   labs(
-    title = "Receitas",
+    title = str_wrap("Receitas sem China e EUA", 13),
     subtitle = "Ingredientes naturais",
     x= "Valores em US$ bi",
     y="",
-    fill = "Tipo país"
+    fill = "Bloco"
   ) 
 
 
@@ -322,10 +322,11 @@ dados_analise %>%
   #filter(!partner_label %in% c("United States of America", "China")) %>%
   filter(product_label == "Natural ingredients") %>%
   mutate(partner_label = reorder(partner_label,total_pais)) %>%
+  mutate(tipo_pais = str_wrap(tipo_pais,10)) %>%
   mutate(total_pais = total_pais/10^6) %>%
   ggplot(aes(y=partner_label, x=total_pais)) +
   geom_col(aes(fill = tipo_pais), show.legend = TRUE)+
-  scale_fill_discrete_qualitative(palette = "Dark 3") +
+  scale_fill_discrete_qualitative(palette = "Dark 3", rev=TRUE) +
   theme_light()+
   theme(
     panel.grid = element_blank(),
@@ -334,11 +335,11 @@ dados_analise %>%
     legend.position = "bottom"
   ) +
   labs(
-    title = "Receitas",
+    title = str_wrap("Receitas com China e EUA", 13),
     subtitle = "Ingredientes naturais",
     x= "Valores em US$ bi",
     y="",
-    fill = "Tipo país",
+    fill = "Bloco",
     caption = "Fonte: Unctad. Elaboração própria"
   ) 
 
@@ -353,7 +354,7 @@ dados_analise %>%
   mutate(partner_label = reorder(partner_label,perc_pais)) %>%
   ggplot(aes(y=partner_label, x=perc_pais)) +
   geom_col(aes(fill = tipo_pais), show.legend = FALSE)+
-  scale_fill_discrete_qualitative(palette = "Dark 3") +
+  scale_fill_discrete_qualitative(palette = "Dark 3", rev=TRUE) +
   theme_light()+
   theme(
     panel.grid = element_blank(),
@@ -377,7 +378,7 @@ dados_analise %>%
   mutate(total_pais = total_pais/10^6) %>%
   ggplot(aes(y=partner_label, x=total_pais)) +
   geom_col(aes(fill = tipo_pais), show.legend = FALSE)+
-  scale_fill_discrete_qualitative(palette = "Dark 3") +
+  scale_fill_discrete_qualitative(palette = "Dark 3", rev=TRUE) +
   theme_light()+
   theme(
     panel.grid = element_blank(),
@@ -401,7 +402,7 @@ dados_analise %>%
   mutate(total_pais = total_pais/10^6) %>%
   ggplot(aes(y=partner_label, x=total_pais)) +
   geom_col(aes(fill = tipo_pais), show.legend = TRUE)+
-  scale_fill_discrete_qualitative(palette = "Dark 3") +
+  scale_fill_discrete_qualitative(palette = "Dark 3", rev=TRUE) +
   theme_light()+
   theme(
     panel.grid = element_blank(),
@@ -429,7 +430,7 @@ dados_analise %>%
   mutate(partner_label = reorder(partner_label,perc_pais)) %>%
   ggplot(aes(y=partner_label, x=perc_pais)) +
   geom_col(aes(fill = tipo_pais), show.legend = FALSE)+
-  scale_fill_discrete_qualitative(palette = "Dark 3") +
+  scale_fill_discrete_qualitative(palette = "Dark 3", rev=TRUE) +
   theme_light()+
   theme(
     panel.grid = element_blank(),
@@ -437,7 +438,7 @@ dados_analise %>%
     strip.background = element_rect(fill =  "black")
   )  +
   labs(
-    title = "Participação",
+    title = str_wrap("Participação nas importações", 16) ,
     subtitle = "Madeira e derivados",
     x= "(%)",
     y="",
@@ -452,7 +453,7 @@ dados_analise %>%
   mutate(total_pais = total_pais/10^6) %>%
   ggplot(aes(y=partner_label, x=total_pais)) +
   geom_col(aes(fill = tipo_pais), show.legend = FALSE)+
-  scale_fill_discrete_qualitative(palette = "Dark 3") +
+  scale_fill_discrete_qualitative(palette = "Dark 3", rev=TRUE) +
   theme_light()+
   theme(
     panel.grid = element_blank(),
@@ -460,7 +461,7 @@ dados_analise %>%
     strip.background = element_rect(fill =  "black")
   )  +
   labs(
-    title = "Receitas",
+    title = str_wrap("Receitas sem China e EUA", 13) ,
     subtitle = "Madeira e derivados",
     x= "Valores em US$ bi",
     y="",
@@ -474,9 +475,10 @@ dados_analise %>%
   filter(product_label == "Wood and derived products") %>%
   mutate(partner_label = reorder(partner_label,total_pais)) %>%
   mutate(total_pais = total_pais/10^6) %>%
+  mutate(tipo_pais = str_wrap(tipo_pais,10)) %>%
   ggplot(aes(y=partner_label, x=total_pais)) +
   geom_col(aes(fill = tipo_pais))+
-  scale_fill_discrete_qualitative(palette = "Dark 3") +
+  scale_fill_discrete_qualitative(palette = "Dark 3", rev=TRUE) +
   theme_light()+
   theme(
     panel.grid = element_blank(),
@@ -485,11 +487,11 @@ dados_analise %>%
     legend.position = "bottom"
   )  +
   labs(
-    title = "Receitas",
+    title = str_wrap("Receitas com China e EUA", 13),
     subtitle = "Madeira e derivados",
     x= "Valores em US$ bi",
     y="",
-    fill = "Tipo país",
+    fill = "Bloco",
     caption = "Fonte: Unctad. Elaboração própria"
   )
 
@@ -506,7 +508,7 @@ dados_analise %>%
   mutate(partner_label = reorder(partner_label,perc_pais)) %>%
   ggplot(aes(y=partner_label, x=perc_pais)) +
   geom_col(aes(fill = tipo_pais), show.legend = FALSE)+
-  scale_fill_discrete_qualitative(palette = "Dark 3") +
+  scale_fill_discrete_qualitative(palette = "Dark 3", rev=TRUE) +
   theme_light()+
   theme(
     panel.grid = element_blank(),
@@ -530,7 +532,7 @@ dados_analise %>%
   mutate(total_pais = total_pais/10^6) %>%
   ggplot(aes(y=partner_label, x=total_pais)) +
   geom_col(aes(fill = tipo_pais), show.legend = FALSE)+
-  scale_fill_discrete_qualitative(palette = "Dark 3") +
+  scale_fill_discrete_qualitative(palette = "Dark 3", rev=TRUE) +
   theme_light()+
   theme(
     panel.grid = element_blank(),
@@ -556,7 +558,7 @@ dados_analise %>%
   mutate(total_pais = total_pais/10^6) %>%
   ggplot(aes(y=partner_label, x=total_pais)) +
   geom_col(aes(fill = tipo_pais), show.legend = TRUE)+
-  scale_fill_discrete_qualitative(palette = "Dark 3") +
+  scale_fill_discrete_qualitative(palette = "Dark 3", rev=TRUE) +
   theme_light()+
   theme(
     panel.grid = element_blank(),
@@ -592,25 +594,25 @@ brasil<-
 
 world %>%
   left_join(paises_mapa) %>%
-  mutate(tipo_pais = ifelse(is.na(tipo_pais),"Não associado",tipo_pais)) %>%
+  #mutate(tipo_pais = ifelse(is.na(tipo_pais),"Não associado",tipo_pais)) %>%
   ggplot() +
   geom_sf(aes(fill=tipo_pais)) +
   geom_sf(data = brasil, fill= "yellow") +
-  geom_label(aes(x=-120, y=0, label= str_wrap("Países tipo EUA: importação diferenciada de madeira e derivados",20)), color = "#50a315", fill= "white", alpha= 0.1 )+
-  geom_label(aes(x=170, y=20, label= str_wrap("Países tipo China: importação diferenciada de ingredientes naturais",20)), color = "#e16a86", fill= "white", alpha= 0.1 )+
-  scale_fill_discrete_qualitative(palette = "Dark 3", na.value="gray") +
+  geom_label(aes(x=-140, y=0, label= str_wrap("Bloco Florestal Ocidental: importação diferenciada de madeira e derivados",20)), color = "#50a315", fill= "white", alpha= 0.1 )+
+  geom_label(aes(x=170, y=20, label= str_wrap("Bloco Natural Oriental: importação diferenciada de ingredientes naturais",20)), color = "#e16a86", fill= "white", alpha= 0.1 )+
+  scale_fill_discrete_qualitative(palette = "Dark 3", na.value="gray", rev =TRUE) +
   theme_void() +
   theme(
     panel.background = element_rect(fill="#0077be"),
     legend.position = "none"
   ) +
   labs(
-    title = "Distribuição espacial dos parceiros de produtos naturais por tipo de país",
-    subtitle =  "93,5% do total comercializados corresponde aos países tipos China ou EUA",
+    title = "Distribuição espacial dos parceiros de produtos naturais por bloco",
+    subtitle =  "93,5% do total comercializado corresponde aos países dos blocos Ocidental Florestal e Oriental Natural",
     fill= str_wrap("Tipo de país"),
     caption = "Fonte: Unctad. Elaboração própria"
   )
 
-ggsave(filename = "mapamundi.jpg", dpi=300)
+#ggsave(filename = "mapamundi.jpg", dpi=300)
 ```
 
